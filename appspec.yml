@@ -6,10 +6,7 @@ files:
 
 hooks:
   # Install dependencies and build the React app
-  BeforeInstall:
-    - location: scripts/install_dependencies.sh
-      timeout: 300  # Timeout (5 minutes)
-      runas: ec2-user
+
 
   AfterInstall:
     - location: scripts/build_react.sh
