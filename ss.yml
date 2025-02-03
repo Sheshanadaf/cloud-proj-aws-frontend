@@ -376,15 +376,15 @@ Resources:
 
         - Name: Deploy
           Actions:
-            - Name: DeployToEC2
+            - Name: DeployToS3
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
-                Provider: CodeDeploy
+                Provider: S3
                 Version: '1'
               Configuration:
-                ApplicationName: !Ref LibraryCodeDeploy  # CodeDeploy App Name
-                DeploymentGroupName: !Ref LibraryDeploymentGroup  # Deployment Group
+                BucketName: !Ref FrontendS3Bucket
+                Extract: 'true'  # This will automatically extract the build artifacts to the bucket
               InputArtifacts:
                 - Name: BuildArtifact
               RunOrder: 3

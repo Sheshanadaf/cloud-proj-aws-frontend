@@ -1,22 +1,5 @@
 version: 0.0
 os: linux
 files:
-  - source: /  # Path to the source files (build output) from CodePipeline
-    destination: /home/ec2-user/appk # Path on the EC2 instance where the app will be placed
-
-hooks:
-  # Install dependencies and build the React app
-
-
-  AfterInstall:
-    - location: scripts/build_react.sh
-      timeout: 300  # Timeout (5 minutes)
-      runas: ec2-user
-
-  ApplicationStart:
-    - location: scripts/start_app.sh
-      timeout: 300  # Timeout (5 minutes)
-      runas: ec2-user
-
-  # Optional: Clean up old files after deployment
-
+  - source: /
+    destination: /var/www/html
