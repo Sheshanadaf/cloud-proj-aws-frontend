@@ -37,6 +37,40 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+  
+  LibraryEC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LibraryEC2Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - ec2.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+      Policies:
+        - PolicyName: S3ReadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - "arn:aws:s3:::my-library-frontend-bucket-sheshan-hebron/*"
+        
+
+  LibraryInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: LibraryInstanceProfile
+      Roles:
+        - !Ref LibraryEC2Role
 
   # Launch Template for Auto Scaling Group
   LaunchTemplate:
@@ -47,23 +81,29 @@ Resources:
       LaunchTemplateData:
         ImageId: ami-0c614dee691cbbf37  # Update AMI for your region
         InstanceType: t2.micro
+        IamInstanceProfile:
+          Name: !Ref LibraryInstanceProfile
         SecurityGroupIds:
           - !GetAtt EC2SecurityGroup.GroupId  # ✅ Correct way to reference Security Group ID
         UserData:
           Fn::Base64: |
+            #!/bin/bash
             sudo yum update -y
-            sudo yum install ruby wget
+            sudo yum install ruby wget -y
+            sudo amazon-linux-extras enable epel
+            sudo yum install epel-release -y
             cd /home/ec2-user
             wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
             chmod +x install
             sudo ./install auto
             sudo service codedeploy-agent start
+            sudo systemctl enable codedeploy-agent
 
         TagSpecifications:
           - ResourceType: instance
             Tags:
               - Key: Name
-                Value: LibraryInstance
+                Value: LibraryEC2
 
 
   
@@ -123,7 +163,7 @@ Resources:
   LibraryCodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: CodePipelineRole1
+      RoleName: CodePipelineRole2
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -141,6 +181,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - codedeploy:GetDeploymentConfig
+                  - codedeploy:GetApplicationRevision
                 Resource:
                   - "arn:aws:codedeploy:us-east-1:583966366465:deploymentconfig:*"  # ✅ Changed to wildcard for all deployment configs
 
@@ -186,7 +227,8 @@ Resources:
                 Action:
                   - codestar-connections:UseConnection
                   - codestar-connections:GetConnection
-                Resource: "arn:aws:codeconnections:us-east-1:583966366465:connection/31abb4de-0ade-418a-baff-4c4a07cad0de"
+                Resource: "arn:aws:codeconnections:ap-south-1:583966366465:connection/73137bfd-0dfc-433d-be8d-1454d46fe9e5"
+                          
 
 
 
@@ -254,8 +296,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - "s3:Get*"
+                  - "s3:List*"
                   - "ec2:DescribeInstances"
                   - "ec2:DescribeInstanceStatus"
+                  - "ec2:DescribeTags"
+                  - "ec2:AssociateIamInstanceProfile"
                   - "tag:GetResources"
                   - "autoscaling:CompleteLifecycleAction"
                   - "autoscaling:DeleteLifecycleHook"
@@ -265,7 +311,17 @@ Resources:
                   - "autoscaling:DescribeLifecycleHooks"
                   - "autoscaling:DescribeScalingActivities"
                   - "autoscaling:DescribeNotificationConfigurations"
+                  - "codedeploy:RegisterApplicationRevision"
+                  - "codedeploy:CreateDeployment"
+                  - "codedeploy:GetDeployment"
+                  - "codedeploy:GetDeploymentConfig"
+                  - "codedeploy:GetApplication"
+                  - "codedeploy:GetApplicationRevision"
+                  - "codedeploy:ListDeploymentGroups"
+                  - "codedeploy:ListApplications"
+                  - "codedeploy:BatchGetDeployments"
                 Resource: "*"
+
 
 
   # ✅ AWS CodePipeline (CI/CD)
@@ -287,8 +343,8 @@ Resources:
                 Provider: CodeStarSourceConnection  # ✅ Use AWS CodeStar instead of OAuth
                 Version: '1'
               Configuration:
-                ConnectionArn: arn:aws:codeconnections:us-east-1:583966366465:connection/31abb4de-0ade-418a-baff-4c4a07cad0de  # Replace with actual CodeStar connection ARN
-                FullRepositoryId: Sheshanadaf/CLoud_project_aws
+                ConnectionArn: arn:aws:codeconnections:ap-south-1:583966366465:connection/73137bfd-0dfc-433d-be8d-1454d46fe9e5  # Replace with actual CodeStar connection ARN
+                FullRepositoryId: Sheshanadaf/cloud-proj-aws-frontend
                 BranchName: main
               OutputArtifacts:
                 - Name: SourceArtifact
@@ -375,6 +431,11 @@ Resources:
           Type: KEY_AND_VALUE
       AutoScalingGroups:
         - !Ref AutoScalingGroup  # Attach Auto Scaling Group
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+          - DEPLOYMENT_STOP_ON_REQUEST
       LoadBalancerInfo:
         TargetGroupInfoList:
           - Name: ALBTargetGroup  # Attach to ALB Target Group
