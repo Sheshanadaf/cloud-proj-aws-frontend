@@ -89,6 +89,9 @@ Resources:
           Fn::Base64: |
             #!/bin/bash
             sudo yum update -y
+            sudo yum install git -y
+            sudo yum install nodejs -y
+            sudo yum install npm -y
             sudo yum install ruby wget -y
             sudo amazon-linux-extras enable epel
             sudo yum install epel-release -y
@@ -401,14 +404,16 @@ Resources:
           phases:
             install:
               commands:
+                - echo Installing dependencies...
                 - npm install
             build:
               commands:
-                - npm install -g vite  # Install vite globally if not already installed
+                - echo Building the React app...
                 - npm run build  # Use the Vite build command
           artifacts:
             files:
               - '**/*'
+            base-directory: "dist"
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:5.0
