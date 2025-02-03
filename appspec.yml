@@ -1,8 +1,8 @@
 version: 0.0
 os: linux
 files:
-  - source: /  # Path to the source files (build output) from CodePipeline
-    destination: /home/ec2-user/my-app  # Path on the EC2 instance where the app will be placed
+  - source: /BuildArtif/  # Path to the source files (build output) from CodePipeline
+    destination: /var/www/html/ # Path on the EC2 instance where the app will be placed
 
 hooks:
   # Install dependencies and build the React app
