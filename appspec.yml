@@ -22,7 +22,4 @@ hooks:
       runas: ec2-user
 
   # Optional: Clean up old files after deployment
-  AfterAllowTestTraffic:
-    - location: scripts/cleanup.sh
-      timeout: 300  # Timeout (5 minutes)
-      runas: ec2-user
+
