@@ -101,6 +101,9 @@ Resources:
             sudo ./install auto
             sudo service codedeploy-agent start
             sudo systemctl enable codedeploy-agent
+            sudo yum install -y httpd
+            sudo service httpd start
+            sudo systemctl enable httpd
 
         TagSpecifications:
           - ResourceType: instance
