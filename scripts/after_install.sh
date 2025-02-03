@@ -1,3 +1,6 @@
 cd /var/www/html
-sudo mv index.html i.html
-sudo mv -f dist/* .
+
+if [ -d "assets" ]; then
+    sudo rm -rf assets
+fi
+sudo mv -dist/* .
