@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: /BuildArtif/  # Path to the source files (build output) from CodePipeline
+  - source: /  # Path to the source files (build output) from CodePipeline
     destination: /home/ec2-user/app # Path on the EC2 instance where the app will be placed
 
 hooks:
