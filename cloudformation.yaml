@@ -416,7 +416,7 @@ Resources:
                 - ls -a  # ✅ Recursively list files in the dist/ folder
           artifacts:
             files:
-              - 'dist/**/*'
+              - '**/*'
             
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL

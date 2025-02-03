@@ -1,1 +1,3 @@
-chmod 664 /var/www/html/index.html
+cd /var/www/html
+sudo mv dist/* .
+sudo service httpd start
