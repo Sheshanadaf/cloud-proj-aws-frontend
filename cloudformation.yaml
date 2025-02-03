@@ -116,7 +116,7 @@ Resources:
       MaxSize: '5'
       DesiredCapacity: '2'
       VPCZoneIdentifier:
-        - subnet-0761104f82f35a116 # Replace with your subnet ID
+        - subnet-0e873e785de68682d # Replace with your subnet ID
       TargetGroupARNs:
         - !Ref ALBTargetGroup
       LaunchTemplate:
@@ -147,6 +147,11 @@ Resources:
       Protocol: HTTP
       Port: 80
       TargetType: instance
+      HealthCheckPath: /health # Add a health check path (or keep it default)
+      HealthCheckIntervalSeconds: 30 # Optional
+      HealthCheckTimeoutSeconds: 5 # Optional
+      UnhealthyThresholdCount: 3 # Optional
+      HealthyThresholdCount: 5 # Optional
 
   # ALB Listener
   ALBListener:
@@ -400,7 +405,7 @@ Resources:
             build:
               commands:
                 - npm install -g vite  # Install vite globally if not already installed
-                - vite build  # Use the Vite build command
+                - npm run build  # Use the Vite build command
           artifacts:
             files:
               - '**/*'
