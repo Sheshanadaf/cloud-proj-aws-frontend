@@ -2,6 +2,6 @@
 # Install Node.js and dependencies
 echo "Installing dependencies..."
 sudo yum install -y nodejs npm
-mkdir -p /var/www/html
-cd /var/www/html
+mkdir -p /home/ec2-user/app
+cd /home/ec2-user/app
 npm install
