@@ -171,7 +171,7 @@ Resources:
   LibraryCodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: CodePipelineRole2
+      RoleName: CodePipelineRole3
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -413,7 +413,6 @@ Resources:
           artifacts:
             files:
               - '**/*'
-            base-directory: "dist"
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:5.0
